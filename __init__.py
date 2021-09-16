@@ -23,3 +23,6 @@ class Sample(ApiModule, TableModule):
 
     def get_module_name(self) -> str:
         return 'sample'
+
+    
+sample = Sample()
