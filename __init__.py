@@ -15,6 +15,13 @@ class Sample(ApiModule, TableModule):
         def show_body(body: str = Body(..., embed=True)):
             return f'your body is: {body}'
 
+        # 任意なプレフィックスを作成する為
+        abc_bp = self._register_free_prefix('/abc', 'abc')
+
+        @abc_bp.get('/sample', description='you used a free prefix')
+        def abc_sample():
+            return 'you used a free prefix'
+
     def get_table(self) -> list:
         return []
 
@@ -24,5 +31,5 @@ class Sample(ApiModule, TableModule):
     def get_module_name(self) -> str:
         return 'sample'
 
-    
+
 sample = Sample()
