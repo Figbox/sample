@@ -25,7 +25,10 @@ class Sample(ApiModule, TableModule):
         @bp.post('/create', description='create data to table')
         def create(db: Session = Depends(get_db), data: str = Body(..., embed=True)):
             """create data into the table"""
-            data = SampleTable(data=data, link=str(random.randint(0, 99999)))
+            data = SampleTable(data=data,
+                               link=str(random.randint(0, 99999)),
+                               title=data,
+                               content=data)
             data.create_stamp()
             db.add(data)
             db.commit()
