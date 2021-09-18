@@ -3,9 +3,10 @@ import random
 from fastapi import APIRouter, Body, Depends
 from sqlalchemy.orm import Session
 
+from app.core.database_engine.DbAdaptor import DbAdaptor
 from app.core.module_class import TableModule, ApiModule
 from app.core.page_engine.PageAdaptor import PageAdaptor
-from app.core.table_class.db_core import get_db
+from app.core.database_engine.db_core import get_db
 from app.modules.sample.table import SampleTable
 
 
@@ -23,35 +24,30 @@ class Sample(ApiModule, TableModule):
 
         # テーブル関連
         @bp.post('/create', description='create data to table')
-        def create(db: Session = Depends(get_db), data: str = Body(..., embed=True)):
+        def create(dba: DbAdaptor = Depends(DbAdaptor(SampleTable).dba),
+                   data: str = Body(..., embed=True)):
             """create data into the table"""
             data = SampleTable(data=data,
                                link=str(random.randint(0, 99999)),
                                title=data,
                                content=data)
-            data.create_stamp()
-            db.add(data)
-            db.commit()
-            return data
+            return dba.add(data)
 
         @bp.get('/read', description='read data from table')
-        def read(db: Session = Depends(get_db)):
+        def read(dba: DbAdaptor = Depends(DbAdaptor(SampleTable).dba)):
             """read data from table"""
-            return db.query(SampleTable).all()
+            return dba.read_all()
 
         @bp.put('/update', description='update')
-        def update(id: int, db: Session = Depends(get_db), data: str = Body(..., embed=True)):
-            sample_data: SampleTable = db.query(SampleTable).filter(SampleTable.id == id).first()
+        def update(id: int, dba: DbAdaptor = Depends(DbAdaptor(SampleTable).dba),
+                   data: str = Body(..., embed=True)):
+            sample_data = dba.read_by_id(id)
             sample_data.data = data
-            sample_data.update_stamp()
-            db.commit()
-            return sample_data
+            return dba.update(sample_data)
 
         @bp.delete('/delete', description='delete a data')
-        def delete(id: int, db: Session = Depends(get_db)):
-            db.query(SampleTable).filter(SampleTable.id == id).delete()
-            db.commit()
-            return {}
+        def delete(id: int, dba: DbAdaptor = Depends(DbAdaptor(SampleTable).dba)):
+            return dba.delete(id)
 
         @bp.get('/page/{link}', description='show a page')
         def show_page(link: str, page_adaptor: PageAdaptor = Depends()):
