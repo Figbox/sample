@@ -1,7 +1,10 @@
+import random
+
 from fastapi import APIRouter, Body, Depends
 from sqlalchemy.orm import Session
 
 from app.core.module_class import TableModule, ApiModule
+from app.core.page_engine.PageAdaptor import PageAdaptor
 from app.core.table_class.db_core import get_db
 from app.modules.sample.table import SampleTable
 
@@ -18,10 +21,11 @@ class Sample(ApiModule, TableModule):
         def show_body(body: str = Body(..., embed=True)):
             return f'your body is: {body}'
 
+        # テーブル関連
         @bp.post('/create', description='create data to table')
         def create(db: Session = Depends(get_db), data: str = Body(..., embed=True)):
             """create data into the table"""
-            data = SampleTable(data=data)
+            data = SampleTable(data=data, link=str(random.randint(0, 99999)))
             data.create_stamp()
             db.add(data)
             db.commit()
@@ -45,6 +49,10 @@ class Sample(ApiModule, TableModule):
             db.query(SampleTable).filter(SampleTable.id == id).delete()
             db.commit()
             return {}
+
+        @bp.get('/page/{link}', description='show a page')
+        def show_page(link: str, page_adaptor: PageAdaptor = Depends()):
+            return page_adaptor.bind(SampleTable, link, 'sample/temp.html')
 
         # 任意なプレフィックスを作成する為
         abc_bp = self._register_free_prefix('/abc', 'abc')
