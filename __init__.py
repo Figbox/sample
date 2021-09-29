@@ -2,7 +2,7 @@ import random
 
 from fastapi import APIRouter, Body, Depends
 
-from app.core.database_engine.DbAdaptor import DbAdaptor
+from app.core.adaptor.DbAdaptor import DbAdaptor
 from app.core.module_class import TableModule, ApiModule
 from app.core.page_engine.PageAdaptor import PageAdaptor
 from app.modules.sample.table import SampleTable
