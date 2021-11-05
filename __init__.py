@@ -17,7 +17,7 @@ class Sample(ApiModule, TableModule):
                    ' this sample will tell you how to' \
                    ' create a module_manager for Figbox'
 
-        @bp.post('/show_body')
+        @bp.post('/show_body', description='description', summary='summary')
         def show_body(body: str = Body(..., embed=True)):
             return f'your body is: {body}'
 
